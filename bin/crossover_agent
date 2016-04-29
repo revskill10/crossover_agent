@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require 'crossover_agent'
+
+agent = CrossoverAgent::Base.new(File.expand_path('~') + "/.crossover/config.yml")
+agent.execute

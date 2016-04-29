@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Basic Agent for CrossOver Monitoring Server}
   spec.description   = %q{Basic Agent for CrossOver Monitoring Server}
-  spec.homepage      = "localhost"
+  spec.homepage      = "https://github.com/checkraiser/crossover_agent"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
@@ -23,12 +23,13 @@ Gem::Specification.new do |spec|
   end
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.bindir        = "exe"
+  spec.bindir        = "bin"
   spec.executables   = ["crossover_agent"]
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.11"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_dependency             "rest_client"
+  spec.add_dependency             "rest-client"
+  spec.add_dependency             "usagewatch_ext"
 end
