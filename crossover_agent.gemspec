@@ -34,4 +34,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency             "cpu"
   spec.add_dependency             "sys-filesystem"
   spec.add_dependency             "cli-parser"
+  spec.add_dependency             "os"
+  spec.add_dependency             "usagewatch_ext"
 end

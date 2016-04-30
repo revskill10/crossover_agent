@@ -6,6 +6,8 @@ require 'yaml'
 require 'cli-parser'
 require 'cpu'
 require 'sys/filesystem'
+require 'os'
+require 'usagewatch_ext'
 module CrossoverAgent
   class Base
     include Sys
@@ -20,8 +22,11 @@ module CrossoverAgent
       @delay = @config['delay'] || 1
       @ec2_instance_id = `wget -q -O - http://instance-data/latest/meta-data/instance-id`
       @ec2_instance_id = "localhost" if @ec2_instance_id.empty?
-      @cpu = CPU::Load.new
+      if OS.linux?
+        @cpu = CPU::Load.new
+      end
       @disk_stat = Filesystem.stat('/')
+      @uw = Usagewatch
     end
 
     def remote_url
@@ -41,7 +46,6 @@ module CrossoverAgent
       agent.execute
     end
     def execute
-
       loop do
         begin
           push_data
@@ -72,7 +76,11 @@ module CrossoverAgent
       }
     end
     def get_cpu_usage
-      @cpu.last_minute
+      if OS.linux?
+        @cpu.last_minute
+      else
+        @uw.uw_cpuused
+      end
     end
     def get_disk_usage
       gb_used = @disk_stat.bytes_used / 1024 / 1024 / 1024
