@@ -80,7 +80,7 @@ module CrossoverAgent
       "#{gb_used} Gb / #{gb_total} Gb"
     end
     def get_processes(limit)
-      ps = `ps aux`
+      ps = `ps aux | sort -rk 3,3 | head -n #{limit}`
       mapping = [:user, :pid, :cpu, :mem, :vsz, :rss, :tt, :stat, :started, :time, :command, :arg]
 
       res = []
