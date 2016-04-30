@@ -32,6 +32,8 @@ module CrossoverAgent
         cfg.server = options['-s'] if options['-s']
         cfg.port = options['-p'] if options['-p']
         cfg.auth_token = options['-t'] if options['-t']
+        cfg.limit = options['-l'] if options['-l']
+        cfg.delay = options['-d'] if options['-d']
       end
       agent.execute
     end
