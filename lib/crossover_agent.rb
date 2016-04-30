@@ -3,10 +3,12 @@ require 'ostruct'
 require 'rest-client'
 require 'json'
 require 'yaml'
-require 'usagewatch_ext'
 require 'cli-parser'
+require 'cpu'
+require 'sys/filesystem'
 module CrossoverAgent
   class Base
+    include Sys
     attr_reader :server, :port, :auth_token, :ec2_instance_id
     def initialize(&block)
       @config = OpenStruct.new(server: 'localhost', port: '3000', auth_token: '123456')
@@ -18,7 +20,8 @@ module CrossoverAgent
       @delay = @config['delay'] || 1
       @ec2_instance_id = `wget -q -O - http://instance-data/latest/meta-data/instance-id`
       @ec2_instance_id = "localhost" if @ec2_instance_id.empty?
-      @usg = Usagewatch
+      @cpu = CPU::Load.new
+      @disk_stat = Filesystem.stat('/')
     end
 
     def remote_url
@@ -55,8 +58,8 @@ module CrossoverAgent
     end
 
     def collect_data
-      cpu_usage = @usg.uw_cpuused
-      disk_usage = @usg.uw_diskused
+      cpu_usage = get_cpu_usage
+      disk_usage = get_disk_usage
       running_processes = get_processes(@limit)
       data = {
         metric: {
@@ -68,7 +71,14 @@ module CrossoverAgent
         }
       }
     end
-
+    def get_cpu_usage
+      @cpu.last_minute
+    end
+    def get_disk_usage
+      gb_used = @disk_stat.bytes_used / 1024 / 1024 / 1024
+      gb_total = @disk_stat.bytes_total / 1024 / 1024 / 1024
+      "#{gb_used} Gb / #{gb_total} Gb"
+    end
     def get_processes(limit)
       ps = `ps aux`
       mapping = [:user, :pid, :cpu, :mem, :vsz, :rss, :tt, :stat, :started, :time, :command, :arg]
