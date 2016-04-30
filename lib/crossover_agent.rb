@@ -4,12 +4,13 @@ require 'rest-client'
 require 'json'
 require 'yaml'
 require 'usagewatch_ext'
+require 'cli-parser'
 module CrossoverAgent
   class Base
-    attr_reader :agent, :server, :port, :auth_token, :ec2_instance_id
-    def initialize(path)
-      @config = YAML.load_file(path)
-      @agent = @config['agent']
+    attr_reader :server, :port, :auth_token, :ec2_instance_id
+    def initialize(&block)
+      @config = OpenStruct.new(server: 'localhost', port: '3000', auth_token: '123456')
+      yield @config
       @server = @config['server']
       @port = @config['port']
       @auth_token = @config['auth_token']
@@ -24,7 +25,18 @@ module CrossoverAgent
       "http://#{@server}:#{@port}/metrics"
     end
 
+    def self.execute
+      cli_options = %w(-s -p -t -l -d)
+      args, options = CliParser.parse([], cli_options)
+      agent = CrossoverAgent::Base.new do |cfg|
+        cfg.server = options['-s'] if options['-s']
+        cfg.port = options['-p'] if options['-p']
+        cfg.auth_token = options['-t'] if options['-t']
+      end
+      agent.execute
+    end
     def execute
+
       loop do
         begin
           push_data
