@@ -1,11 +1,9 @@
 require 'spec_helper'
 
 describe CrossoverAgent do
-  let(:path) {
-    path = File.dirname(__FILE__) + '/fixtures/sample-config.yml'
-  }
+
   let(:crossover_agent) {
-    CrossoverAgent::Base.new(path)
+    CrossoverAgent::Base.new
   }
 
   it 'has a version number' do

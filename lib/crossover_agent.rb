@@ -11,17 +11,17 @@ require 'usagewatch_ext'
 module CrossoverAgent
   class Base
     include Sys
-    attr_reader :server, :port, :auth_token, :ec2_instance_id
+    attr_reader :instance_id, :server, :port, :auth_token, :ec2_instance_id
     def initialize(&block)
-      @config = OpenStruct.new(server: 'localhost', port: '3000', auth_token: '123456')
-      yield @config
+      @config = OpenStruct.new(instance_id: 'localhost', server: 'localhost', port: '3000', auth_token: '123456')
+      yield @config if block_given?
       @server = @config['server']
       @port = @config['port']
       @auth_token = @config['auth_token']
       @limit = @config['limit'] || 10
       @delay = @config['delay'] || 1
       @ec2_instance_id = `wget -q -O - http://instance-data/latest/meta-data/instance-id`
-      @ec2_instance_id = "localhost" if @ec2_instance_id.empty?
+      @ec2_instance_id = @config['instance_id'] if @ec2_instance_id.empty?
       if OS.linux?
         @cpu = CPU::Load.new
       end
@@ -34,7 +34,7 @@ module CrossoverAgent
     end
 
     def self.execute
-      cli_options = %w(-s -p -t -l -d)
+      cli_options = %w(-i -s -p -t -l -d)
       args, options = CliParser.parse([], cli_options)
       agent = CrossoverAgent::Base.new do |cfg|
         cfg.server = options['-s'] if options['-s']
@@ -42,6 +42,7 @@ module CrossoverAgent
         cfg.auth_token = options['-t'] if options['-t']
         cfg.limit = options['-l'].to_i if options['-l']
         cfg.delay = options['-d'].to_i if options['-d']
+        cfg.instance_id = options['-i'] if options['-i']
       end
       agent.execute
     end

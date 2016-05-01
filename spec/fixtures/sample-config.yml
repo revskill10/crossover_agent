@@ -1,4 +1,4 @@
-agent: 'localhost'
+instance_id: 'localhost'
 server: 'localhost'
 port: '3000'
 auth_token: '123456'
